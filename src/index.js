@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import optimizelyClientInstance from "./Optimizely";
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import optimizelyClientInstance from "./Optimizely";
 window.optimizelyClientInstance=optimizelyClientInstance
 ReactDOM.render(
   <React.StrictMode>

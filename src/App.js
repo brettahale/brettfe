@@ -14,6 +14,7 @@ import analytics from './Analytics'
 import {OptimizelyExperiment, OptimizelyProvider, OptimizelyVariation} from "@optimizely/react-sdk";
 import {blue, red} from "@material-ui/core/colors";
 import { enums } from '@optimizely/react-sdk';
+import {identify, page, experimentViewed, orderCompleted} from '@goodrx/segment/plans/core_consumer_prod'
 
 const styles = (theme) => ({
     appBar: {
@@ -76,34 +77,45 @@ class App extends React.Component {
     onActivate = (experiment, userId, attributes, variation, event) => {
         console.log(experiment)
         // Send data to analytics provider here
-        analytics.track({
-            event: 'Experiment Viewed',
-            userId: experiment.userId,
-            properties: {
-                experimentId: experiment.experiment.id,
-                experimentName: experiment.experiment.key,
-                variationId: experiment.variation.id,
-                variationName: experiment.variation.key,
-                campaignId: experiment.experiment.layerId,
-            }
+        experimentViewed({
+            experimentId: experiment.experiment.id,
+            experimentName: experiment.experiment.key,
+            variationId: experiment.variation.id,
+            variationName: experiment.variation.key,
+            campaignId: experiment.experiment.layerId,
         });
+
+        // analytics.track({
+        //     event: 'Experiment Viewed',
+        //     userId: experiment.userId,
+        //     properties: {
+        //         experimentId: experiment.experiment.id,
+        //         experimentName: experiment.experiment.key,
+        //         variationId: experiment.variation.id,
+        //         variationName: experiment.variation.key,
+        //         campaignId: experiment.experiment.layerId,
+        //     }
+        // });
     }
 
 
     trackOrderComplete = () => {
-        analytics.track({
-            event: 'OrderComplete',
-            userId: localStorage.getItem('userId'),
-            properties: {
-                revenue: 39.95,
-                shippingMethod: '2-day',
-            }
-        });
+        orderCompleted({})
+        // analytics.track({
+        //     event: 'OrderComplete',
+        //     userId: localStorage.getItem('userId'),
+        //     properties: {
+        //         revenue: 39.95,
+        //         shippingMethod: '2-day',
+        //     }
+        // });
     }
 
     componentDidMount() {
-       analytics.identify({userId: localStorage.getItem('userId')})
 
+        // identify({userId: localStorage.getItem('userId')});
+       identify({})
+        page({category: "funnel", name: "step_1"})
     }
 
     render() {
