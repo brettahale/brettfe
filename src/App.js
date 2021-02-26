@@ -13,8 +13,14 @@ import optimizely from "./Optimizely";
 import analytics from './Analytics'
 import {OptimizelyExperiment, OptimizelyProvider, OptimizelyVariation} from "@optimizely/react-sdk";
 import {blue, red} from "@material-ui/core/colors";
-import { enums } from '@optimizely/react-sdk';
-import {identify, page, experimentViewed, orderCompleted} from '@goodrx/segment/plans/core_consumer_prod'
+import {
+    identify,
+    page,
+    experimentViewed,
+    orderCompleted,
+    setAnonymousId
+} from '@goodrx/segment/plans/core_consumer_prod'
+import {v4 as uuidv4} from "uuid";
 
 const styles = (theme) => ({
     appBar: {
@@ -66,8 +72,14 @@ class App extends React.Component {
         this.state = {
             activeStep: 0
         };
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', uuidv4())
+        }
+        optimizely.onReady().then(() => {
+            analytics.load(process.env.REACT_APP_SEGMENT_WK)
+        });
         // optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.DECISION, this.onDecision);
-        optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.ACTIVATE, this.onActivate);
+        // optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.ACTIVATE, this.onActivate);
     }
 
     handleNext = () => {
@@ -114,6 +126,7 @@ class App extends React.Component {
     componentDidMount() {
 
         // identify({userId: localStorage.getItem('userId')});
+        setAnonymousId(localStorage.getItem('userId'))
        identify({})
         page({category: "funnel", name: "step_1"})
     }
