@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import optimizely from "./Optimizely";
+import optimizely, {enums} from "./Optimizely";
 import analytics from './Analytics'
 import {OptimizelyExperiment, OptimizelyProvider, OptimizelyVariation} from "@optimizely/react-sdk";
 import {blue, red} from "@material-ui/core/colors";
@@ -75,11 +75,16 @@ class App extends React.Component {
         if (!localStorage.getItem('userId')) {
             localStorage.setItem('userId', uuidv4())
         }
-        optimizely.onReady().then(() => {
-            analytics.load(process.env.REACT_APP_SEGMENT_WK)
+            optimizely.onReady().then(() => {
+            window.analytics.load(process.env.REACT_APP_SEGMENT_WK,{
+                Optimizely: {
+                    userId: localStorage.getItem('userId')
+                }
+            })
         });
+
         // optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.DECISION, this.onDecision);
-        // optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.ACTIVATE, this.onActivate);
+        optimizely.notificationCenter.addNotificationListener(enums.NOTIFICATION_TYPES.ACTIVATE, this.onActivate);
     }
 
     handleNext = () => {
@@ -97,37 +102,38 @@ class App extends React.Component {
             campaignId: experiment.experiment.layerId,
         });
 
-        // analytics.track({
-        //     event: 'Experiment Viewed',
-        //     userId: experiment.userId,
-        //     properties: {
-        //         experimentId: experiment.experiment.id,
-        //         experimentName: experiment.experiment.key,
-        //         variationId: experiment.variation.id,
-        //         variationName: experiment.variation.key,
-        //         campaignId: experiment.experiment.layerId,
-        //     }
-        // });
+        window.analytics.track('Experiment Viewed',
+            {
+                experimentId: experiment.experiment.id,
+                experimentName: experiment.experiment.key,
+                variationId: experiment.variation.id,
+                variationName: experiment.variation.key,
+                campaignId: experiment.experiment.layerId,
+            }
+        );
     }
 
 
     trackOrderComplete = () => {
-        orderCompleted({})
-        // analytics.track({
-        //     event: 'OrderComplete',
-        //     userId: localStorage.getItem('userId'),
-        //     properties: {
-        //         revenue: 39.95,
-        //         shippingMethod: '2-day',
-        //     }
-        // });
+        // orderCompleted({})
+        window.analytics.track('Order Completed',
+            {
+                revenue: 39.95,
+                shippingMethod: '2-day',
+            },
+            {
+                Optimizely: {
+                    userId: localStorage.getItem('userId')
+                }
+            })
+
     }
 
     componentDidMount() {
 
         // identify({userId: localStorage.getItem('userId')});
         setAnonymousId(localStorage.getItem('userId'))
-       identify({})
+       // identify({})
         page({category: "funnel", name: "step_1"})
     }
 
@@ -153,11 +159,11 @@ class App extends React.Component {
 
                     <OptimizelyExperiment experiment="login">
                         <OptimizelyVariation variation="login">
-                            <Button onClick={this.trackOrderComplete} className={classes.blue}>blue</Button>
+                            <Button onClick={this.trackOrderComplete} className={classes.blue}>login</Button>
                         </OptimizelyVariation>
 
                         <OptimizelyVariation variation="form">
-                            <Button onClick={this.trackOrderComplete} className={classes.red}>red</Button>
+                            <Button onClick={this.trackOrderComplete} className={classes.red}>form</Button>
                         </OptimizelyVariation>
 
                         <OptimizelyVariation default>

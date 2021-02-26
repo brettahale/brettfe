@@ -6,6 +6,7 @@
 // });
 
 import {
+    enums,
     createInstance
 } from '@optimizely/react-sdk';
 import analytics from "./Analytics";
@@ -13,5 +14,6 @@ const optimizely = createInstance({
     sdkKey: process.env.REACT_APP_OPTIMIZELY_SDK_KEY,
 });
 window.optimizelyClientInstance = optimizely
-analytics.load(process.env.REACT_APP_SEGMENT_WK)
+// analytics.load(process.env.REACT_APP_SEGMENT_WK)
 export default optimizely
+export {enums};
